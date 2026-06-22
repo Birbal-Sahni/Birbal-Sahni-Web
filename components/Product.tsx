@@ -38,7 +38,7 @@ export default function Product() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Title slide in + blur fade
+      
       gsap.fromTo(
         titleRef.current,
         { y: 40, opacity: 0 },
@@ -55,7 +55,7 @@ export default function Product() {
         }
       );
 
-      // Subtitle
+      
       gsap.fromTo(
         subtitleRef.current,
         { y: 30, opacity: 0 },
@@ -72,7 +72,7 @@ export default function Product() {
         }
       );
 
-      // Cards stagger
+      
       cardsRef.current.forEach((card, i) => {
         if (!card) return;
         gsap.fromTo(
@@ -104,14 +104,14 @@ export default function Product() {
       className="relative min-h-screen flex flex-col justify-center px-6 sm:px-12 md:px-20 lg:px-28 py-32 overflow-hidden"
     >
       <div className="max-w-4xl relative z-10 pl-6 sm:pl-10 md:pl-16">
-        {/* Section tag */}
+        {}
         <div className="flex items-center gap-3 mb-6">
           <span className="text-xs font-mono tracking-[0.4em] uppercase text-accent/60">
             [ SYSTEM SPECIFICATION ]
           </span>
         </div>
 
-        {/* Title */}
+        {}
         <h2
           ref={titleRef}
           className="text-4xl sm:text-6xl lg:text-7xl font-extralight tracking-tighter leading-none mb-6"
@@ -130,7 +130,7 @@ export default function Product() {
           surgical-grade operations under extreme environmental variables.
         </p>
 
-        {/* Feature Cards Grid */}
+        {}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl">
           {features.map((feature, i) => (
             <div
@@ -140,7 +140,7 @@ export default function Product() {
               }}
               className="pointer-events-auto glass-card tech-border rounded-sm p-8 flex flex-col justify-between min-h-[300px] group border-purple-500/5 relative overflow-hidden"
             >
-              {/* Animated scan bar */}
+              {}
               <div className="scan-bar" />
 
               <div>
@@ -149,7 +149,7 @@ export default function Product() {
                   {feature.num}
                 </div>
 
-                {/* Title */}
+                {}
                 <h3 className="text-lg font-light text-white mb-3 tracking-wide">
                   {feature.title}
                 </h3>

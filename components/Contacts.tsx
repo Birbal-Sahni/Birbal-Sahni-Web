@@ -13,7 +13,7 @@ export default function Contacts() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Title slide in
+      
       gsap.fromTo(
         titleRef.current,
         { y: 40, opacity: 0 },
@@ -30,7 +30,7 @@ export default function Contacts() {
         }
       );
 
-      // Info block fade-in
+      
       gsap.fromTo(
         infoRef.current,
         { y: 30, opacity: 0 },
@@ -58,14 +58,14 @@ export default function Contacts() {
       className="relative min-h-[60vh] flex flex-col justify-center px-6 sm:px-12 md:px-20 lg:px-28 py-20 overflow-hidden"
     >
       <div className="relative z-10 max-w-4xl pl-6 sm:pl-10 md:pl-16 w-full">
-        {/* Section tag */}
+        {}
         <div className="flex items-center gap-3 mb-6">
           <span className="text-xs font-mono tracking-[0.4em] uppercase text-accent/60">
             [ CONTACT CONSOLE ]
           </span>
         </div>
 
-        {/* Title */}
+        {}
         <h2
           ref={titleRef}
           className="text-4xl sm:text-6xl font-extralight tracking-tighter leading-none mb-12"
@@ -88,7 +88,7 @@ export default function Contacts() {
           <div className="flex flex-col gap-6">
             <span className="text-xs font-mono text-accent/50 tracking-widest uppercase">// CHANNEL NODES</span>
 
-            {/* Phone */}
+            {}
             <div className="group flex flex-col gap-1 pointer-events-auto">
               <span className="text-xs font-mono text-accent/40 uppercase">Voice Uplink</span>
               <a

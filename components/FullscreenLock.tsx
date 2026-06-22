@@ -11,7 +11,7 @@ export default function FullscreenLock({ children }: { children: React.ReactNode
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Create audio player pointing to public/audio.mp3
+    
     const audio = new Audio("/audio.mp3");
     audio.loop = true;
     audio.volume = 0.5;
@@ -21,7 +21,7 @@ export default function FullscreenLock({ children }: { children: React.ReactNode
       const active = !!document.fullscreenElement;
       setIsFullscreen(active);
 
-      // Play/Pause audio on fullscreen state change
+      
       if (audioRef.current) {
         if (active && !isMuted) {
           audioRef.current.play().catch((err) => {
@@ -35,7 +35,7 @@ export default function FullscreenLock({ children }: { children: React.ReactNode
 
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     
-    // Check initial state
+    
     setIsFullscreen(!!document.fullscreenElement);
 
     return () => {
@@ -77,7 +77,7 @@ export default function FullscreenLock({ children }: { children: React.ReactNode
   if (!isFullscreen) {
     return (
       <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#050208] text-white p-6 overflow-hidden">
-        {/* Subtle background tech grid */}
+        {}
         <div className="absolute inset-0 opacity-15 pointer-events-none bg-[linear-gradient(rgba(168,85,247,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.05)_1px,transparent_1px)] bg-[size:32px_32px]" />
         
         {/* Glowing visual indicator */}
@@ -91,7 +91,7 @@ export default function FullscreenLock({ children }: { children: React.ReactNode
           <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-purple-400/40" />
           <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-purple-400/40" />
 
-          {/* Alert Code */}
+          {}
           <span className="text-[10px] font-mono tracking-[0.3em] text-accent/60 mb-2 uppercase">
             [ LINK_CALIBRATION_REQUIRED ]
           </span>

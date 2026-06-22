@@ -29,6 +29,9 @@ export const metadata: Metadata = {
     "Teleoperation",
     "Delhi Bootcamp",
   ],
+  icons: {
+    icon: "https://assets.techforge.pranab.xyz/assets/Logo-Dark.svg",
+  },
   openGraph: {
     title: "Team Birbal Sahni | Master-Slave Robotic Arm",
     description:

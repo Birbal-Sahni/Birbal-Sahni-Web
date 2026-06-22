@@ -1,23 +1,24 @@
 "use client";
 
-import { useRef, useState, useMemo } from "react";
-import { useFrame } from "@react-three/fiber";
-import { Center, useGLTF } from "@react-three/drei";
+import { useRef, useState, useMemo, useEffect } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 
 interface SlaveArmProps {
   scrollProgress: number;
+  isLightbox: boolean;
+  setIsLightbox: (open: boolean) => void;
 }
 
-export default function SlaveArm({ scrollProgress }: SlaveArmProps) {
+export default function SlaveArm({ scrollProgress, isLightbox, setIsLightbox }: SlaveArmProps) {
   const meshRef = useRef<THREE.Mesh>(null!);
   const materialRef = useRef<THREE.MeshStandardMaterial>(null!);
   const [hovered, setHovered] = useState(false);
+  const { camera } = useThree();
 
-  // Load the Draco-compressed GLB model
   const { scene } = useGLTF("/slave-arm.glb");
 
-  // Dynamically extract the geometry from the loaded GLB mesh
   const geometry = useMemo<THREE.BufferGeometry | null>(() => {
     let geom: THREE.BufferGeometry | null = null;
     scene.traverse((node) => {
@@ -28,17 +29,13 @@ export default function SlaveArm({ scrollProgress }: SlaveArmProps) {
     return geom;
   }, [scene]);
 
-  // Center the geometry bounds and calculate raw max dimension
   const { originalMaxDim } = useMemo(() => {
     if (!geometry) return { originalMaxDim: 1.0 };
-
     const geom = geometry as THREE.BufferGeometry;
 
-    // Compute normals & bounds
     geom.computeVertexNormals();
     geom.computeBoundingBox();
 
-    // Center geometry around origin pivot
     const center = new THREE.Vector3();
     geom.boundingBox!.getCenter(center);
 
@@ -46,45 +43,59 @@ export default function SlaveArm({ scrollProgress }: SlaveArmProps) {
     geom.boundingBox!.getSize(size);
     const maxDim = Math.max(size.x, size.y, size.z);
 
-    console.log("📐 [SlaveArm] Raw Geometry Info:", {
-      center: [center.x, center.y, center.z],
-      dimensions: [size.x, size.y, size.z],
-      maxDimension: maxDim
-    });
-
     geom.translate(-center.x, -center.y, -center.z);
-
-    // Recompute bounding box after translate
     geom.computeBoundingBox();
 
     return { originalMaxDim: maxDim };
   }, [geometry]);
 
-  // Precompute target colors (davidlangarica.dev inspired palette)
-  const baseColor = useMemo(() => new THREE.Color("#bca5e6"), []); // Highly reflective silver-lavender
-  const hoverColor = useMemo(() => new THREE.Color("#f3e8ff"), []); // Glowing near-white lavender
+  const baseColor = useMemo(() => new THREE.Color("#bca5e6"), []);
+  const hoverColor = useMemo(() => new THREE.Color("#f3e8ff"), []);
   const currentColor = useMemo(() => new THREE.Color("#bca5e6"), []);
+
+  useEffect(() => {
+    if (isLightbox) {
+      camera.position.set(0, 0, 8);
+      camera.lookAt(0, 0, 0);
+    }
+  }, [isLightbox, camera]);
 
   useFrame((state) => {
     if (!meshRef.current || !materialRef.current || !geometry) return;
 
     const time = state.clock.getElapsedTime();
-    const camera = state.camera;
+    const currentCamera = state.camera;
     const pointer = state.pointer;
     const { width, height } = state.viewport;
 
-    // Detect mobile viewport (R3F viewport width is small on mobile)
     const isMobile = width < 7.5;
 
-    // ── Color interpolation on hover (only on desktop) ──────────────
     const targetColor = hovered && !isMobile ? hoverColor : baseColor;
     currentColor.lerp(targetColor, 0.08);
     materialRef.current.color.copy(currentColor);
 
-    // ── Dynamic Responsive Scale ──────────────────────────────────────
+    materialRef.current.roughness = isMobile ? 0.45 : 0.15;
+    materialRef.current.envMapIntensity = isMobile ? 0.4 : 1.4;
+
+    if (isLightbox) {
+      const targetScale = (height * 0.60) / originalMaxDim;
+      meshRef.current.scale.x = THREE.MathUtils.lerp(meshRef.current.scale.x, targetScale, 0.1);
+      meshRef.current.scale.y = THREE.MathUtils.lerp(meshRef.current.scale.y, targetScale, 0.1);
+      meshRef.current.scale.z = THREE.MathUtils.lerp(meshRef.current.scale.z, targetScale, 0.1);
+
+      meshRef.current.position.x = THREE.MathUtils.lerp(meshRef.current.position.x, 0, 0.04);
+      meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, 0, 0.04);
+      meshRef.current.position.z = THREE.MathUtils.lerp(meshRef.current.position.z, 0, 0.04);
+
+      const idleSpin = time * 0.15;
+      meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, idleSpin, 0.04);
+      meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, 0.1, 0.04);
+      return;
+    }
+
     const baseScaleVal = isMobile
-      ? (height * 0.45) / originalMaxDim // Occupy 45% of height on mobile
-      : (height * 0.65) / originalMaxDim; // Occupy 65% of height on desktop
+      ? (height * 0.45) / originalMaxDim
+      : (height * 0.65) / originalMaxDim;
 
     const hoverBoost = hovered && !isMobile ? 1.05 : 1.0;
     const targetScale = baseScaleVal * hoverBoost;
@@ -93,11 +104,6 @@ export default function SlaveArm({ scrollProgress }: SlaveArmProps) {
     meshRef.current.scale.y = THREE.MathUtils.lerp(meshRef.current.scale.y, targetScale, 0.1);
     meshRef.current.scale.z = THREE.MathUtils.lerp(meshRef.current.scale.z, targetScale, 0.1);
 
-    // ── Dynamic Material overrides for Mobile (Background Silhouetting) ──
-    materialRef.current.roughness = isMobile ? 0.45 : 0.15;
-    materialRef.current.envMapIntensity = isMobile ? 0.4 : 1.4;
-
-    // ── Camera and Mesh target transforms based on scroll ──────────
     let camTargetX = 0;
     let camTargetY = 0;
     let camTargetZ = 8;
@@ -108,46 +114,40 @@ export default function SlaveArm({ scrollProgress }: SlaveArmProps) {
     let targetPosY = 0;
     let targetPosZ = 0;
 
-    const idleSpin = time * 0.12; // Slow ambient spin
+    const idleSpin = time * 0.12;
 
     if (isMobile) {
-      // ── MOBILE LAYOUT (Centered behind text, non-interactive) ────────
       targetPosX = 0;
-      targetPosY = Math.sin(time * 0.6) * 0.1 - 0.2; // float lower down
-      targetPosZ = -1.2; // pushed back into background
+      targetPosY = Math.sin(time * 0.6) * 0.1 - 0.2;
+      targetPosZ = -1.2;
 
       targetRotY = idleSpin;
       targetRotX = 0.1;
 
       camTargetX = 0;
       camTargetY = 0;
-      camTargetZ = 8.5; // pull camera slightly further back
+      camTargetZ = 8.5;
     } else {
-      // ── DESKTOP LAYOUT (Locked to the right side box) ────────────────
-      // Dynamically cap targetPosX relative to viewport width to prevent overflow
       targetPosX = Math.min(width * 0.22, 2.6);
 
       if (scrollProgress < 0.33) {
-        // Phase 1: Hero
         const phase = scrollProgress / 0.33;
         targetRotY = idleSpin + phase * 0.4;
         targetPosY = Math.sin(time * 0.8) * 0.15;
         
-        camTargetX = -0.3; // camera offset left moves model right in view
+        camTargetX = -0.3;
         camTargetY = 0;
         camTargetZ = 8;
       } else if (scrollProgress < 0.66) {
-        // Phase 2: Product
         const phase = (scrollProgress - 0.33) / 0.33;
         targetRotY = idleSpin + 0.4 + phase * Math.PI;
-        targetRotX = 0.2; // forward tilt
+        targetRotX = 0.2;
         targetPosY = Math.sin(time * 0.6) * 0.08;
 
         camTargetX = -0.5;
         camTargetY = 0.1;
         camTargetZ = 7.5;
       } else {
-        // Phase 3: Team / Contacts
         const phase = (scrollProgress - 0.66) / 0.34;
         targetRotY = idleSpin + 0.4 + Math.PI + phase * 1.8;
         targetRotX = 0.2 + phase * 0.35;
@@ -160,22 +160,18 @@ export default function SlaveArm({ scrollProgress }: SlaveArmProps) {
       }
     }
 
-    // ── Mouse Pointer Parallax (Only active on desktop) ──────────────
     const mouseStrength = isMobile ? 0 : 0.6;
     const parallaxX = pointer.x * mouseStrength;
     const parallaxY = pointer.y * mouseStrength;
 
-    // Smoothly interpolate camera position
     const camLerpSpeed = 0.04;
-    camera.position.x = THREE.MathUtils.lerp(camera.position.x, camTargetX + parallaxX, camLerpSpeed);
-    camera.position.y = THREE.MathUtils.lerp(camera.position.y, camTargetY + parallaxY, camLerpSpeed);
-    camera.position.z = THREE.MathUtils.lerp(camera.position.z, camTargetZ, camLerpSpeed);
+    currentCamera.position.x = THREE.MathUtils.lerp(currentCamera.position.x, camTargetX + parallaxX, camLerpSpeed);
+    currentCamera.position.y = THREE.MathUtils.lerp(currentCamera.position.y, camTargetY + parallaxY, camLerpSpeed);
+    currentCamera.position.z = THREE.MathUtils.lerp(currentCamera.position.z, camTargetZ, camLerpSpeed);
 
-    // Look at a target point centered on the model's Y height
     const lookTarget = new THREE.Vector3(0, targetPosY * 0.4, 0);
-    camera.lookAt(lookTarget);
+    currentCamera.lookAt(lookTarget);
 
-    // Smoothly interpolate all transforms on the mesh
     const lerpSpeed = 0.04;
     meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, targetRotY, lerpSpeed);
     meshRef.current.rotation.x = THREE.MathUtils.lerp(meshRef.current.rotation.x, targetRotX, lerpSpeed);
@@ -202,6 +198,10 @@ export default function SlaveArm({ scrollProgress }: SlaveArmProps) {
         setHovered(false);
         document.body.style.cursor = "default";
       }}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        setIsLightbox(!isLightbox);
+      }}
       castShadow
       receiveShadow
     >
@@ -216,5 +216,4 @@ export default function SlaveArm({ scrollProgress }: SlaveArmProps) {
   );
 }
 
-// Preload the model for performance
 useGLTF.preload("/slave-arm.glb");

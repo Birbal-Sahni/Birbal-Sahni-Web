@@ -7,19 +7,21 @@ import Footer from "@/components/Footer";
 import ScrollProvider from "@/components/ScrollProvider";
 import FullscreenLock from "@/components/FullscreenLock";
 import Preloader from "@/components/Preloader";
+import ScrollProgress from "@/components/ScrollProgress";
 
 export default function Home() {
   return (
     <>
-      {/* 3D Canvas — fixed background layer */}
+      {}
       <Scene3DWrapper />
 
       <FullscreenLock>
         {/* Diagnostics preloader */}
         <Preloader />
 
-        {/* UI Overlay — sits above the 3D canvas */}
+        {}
         <ScrollProvider>
+          <ScrollProgress />
           <main className="relative z-10 pointer-events-none">
             <Hero />
             <Product />

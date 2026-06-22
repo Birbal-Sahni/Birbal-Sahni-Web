@@ -69,14 +69,14 @@ export default function Hero() {
       ref={containerRef}
       className="relative min-h-screen flex flex-col justify-between px-6 sm:px-12 md:px-20 lg:px-28 py-16 overflow-hidden select-none"
     >
-      {/* Decorative cyber grid scan elements */}
+      
       <div className="absolute top-0 right-0 w-[400px] h-[400px] border-r border-t border-purple-500/5 pointer-events-none mr-28 mt-28">
         <div className="absolute top-0 right-0 w-2 h-2 bg-accent/20" />
         <div className="absolute bottom-0 right-0 w-6 h-[1px] bg-accent/10" />
         <div className="absolute top-0 left-0 w-[1px] h-6 bg-accent/10" />
       </div>
 
-      {/* Asymmetric Category Header */}
+      
       <div
         ref={categoryRef}
         className="flex items-center justify-between w-full text-base font-mono tracking-[0.3em] uppercase text-accent mt-4"
@@ -88,7 +88,7 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Asymmetric Technical Sidebar Indicator */}
+      
       <div
         ref={sidebarRef}
         className="absolute left-6 sm:left-12 lg:left-16 top-[35%] -translate-y-1/2 flex flex-col items-start gap-4 font-mono text-xs sm:text-sm tracking-[0.25em] text-accent uppercase writing-mode-vertical border-l border-purple-500/20 pl-4 py-2 pointer-events-none"
@@ -98,7 +98,7 @@ export default function Hero() {
         <span className="opacity-50 mt-4">SYS_RATE_HIGH // TELEMETRY_DUMP</span>
       </div>
 
-      {/* Main Massive Editorial Title */}
+      
       <div className="my-auto max-w-4xl text-left select-none pointer-events-none pl-6 sm:pl-10 md:pl-16">
         <h1 className="text-7xl sm:text-9xl font-extralight tracking-tighter leading-[0.85] text-white">
           <span ref={word1Ref} className="block overflow-hidden pb-2 font-light">
@@ -112,7 +112,7 @@ export default function Hero() {
           </span>
         </h1>
 
-        {/* Short Concept description with Tech borders */}
+        
         <div
           ref={detailsRef}
           className="tech-border mt-8 sm:mt-12 flex flex-col sm:flex-row gap-6 sm:gap-12 items-start max-w-2xl text-muted text-base sm:text-lg leading-relaxed p-6 bg-[#0d0a18]/20 backdrop-blur-sm border border-purple-500/5 rounded-sm"
@@ -128,9 +128,9 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Bottom Footer Section */}
+      
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 sm:gap-0 w-full mb-4">
-        {/* Asymmetrical Scroll Trigger Button */}
+        
         <a
           ref={linkRef}
           href="#product"
@@ -143,7 +143,7 @@ export default function Hero() {
           </div>
         </a>
 
-        {/* Technical Coordinate Indicators */}
+        
         <div className="font-mono text-xs sm:text-sm text-muted opacity-45 text-right leading-relaxed tracking-widest hidden sm:block">
           <span>LAT_DELHI.28.61 // LON_DELHI.77.20</span>
           <br />

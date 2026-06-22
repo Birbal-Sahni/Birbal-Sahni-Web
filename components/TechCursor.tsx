@@ -11,7 +11,7 @@ export default function TechCursor() {
   const crossRef = useRef<HTMLDivElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
 
-  // Mouse coords interpolation refs for lag effect
+  
   const mousePos = useRef({ x: 0, y: 0 });
   const dotPos = useRef({ x: 0, y: 0 });
   const crossPos = useRef({ x: 0, y: 0 });
@@ -19,7 +19,7 @@ export default function TechCursor() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    // Detect touch device
+    
     const checkTouch = () => {
       setIsTouchDevice(window.matchMedia("(pointer: coarse)").matches);
     };
@@ -39,10 +39,10 @@ export default function TechCursor() {
     window.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseleave", handleMouseLeave);
 
-    // Animation frame for smooth cursor tracking lag
+    
     let frameId: number;
     const animate = () => {
-      // Linear interpolation (lerp)
+      
       const speedDot = 0.25;
       const speedCross = 0.08;
 
@@ -78,7 +78,7 @@ export default function TechCursor() {
 
   return (
     <div className="fixed inset-0 pointer-events-none z-[200] hidden md:block">
-      {/* Centered tiny core dot */}
+      {}
       <div
         ref={dotRef}
         className="absolute top-0 left-0 w-1.5 h-1.5 bg-accent rounded-full -translate-x-1/2 -translate-y-1/2"

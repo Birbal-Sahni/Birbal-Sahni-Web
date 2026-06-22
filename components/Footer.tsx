@@ -3,7 +3,7 @@
 export default function Footer() {
   return (
     <footer className="relative py-12 px-6 sm:px-12 md:px-20 lg:px-28 border-t border-purple-500/5">
-      {/* Gradient top border overlay */}
+      {}
       <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-purple-500/10 to-transparent" />
 
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">

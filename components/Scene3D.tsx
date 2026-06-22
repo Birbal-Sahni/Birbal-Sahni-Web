@@ -2,11 +2,25 @@
 
 import { Suspense, useState, useRef, useEffect } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Environment, Html } from "@react-three/drei";
+import { Environment, Html, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import SlaveArm from "./SlaveArm";
 
-// ── Loading Spinner ─────────────────────────────
+if (typeof window !== "undefined") {
+  const originalWarn = console.warn;
+  console.warn = (...args: any[]) => {
+    if (
+      args[0] &&
+      typeof args[0] === "string" &&
+      (args[0].includes("THREE.Clock: This module has been deprecated") ||
+       args[0].includes("PCFSoftShadowMap has been deprecated"))
+    ) {
+      return;
+    }
+    originalWarn.apply(console, args);
+  };
+}
+
 function LoadingFallback() {
   return (
     <Html center>
@@ -23,7 +37,6 @@ function LoadingFallback() {
   );
 }
 
-// ── Scroll Progress Tracker (runs inside Canvas) ─
 function ScrollTracker({ onProgress }: { onProgress: (p: number) => void }) {
   useFrame(() => {
     if (typeof window === "undefined") return;
@@ -35,7 +48,6 @@ function ScrollTracker({ onProgress }: { onProgress: (p: number) => void }) {
   return null;
 }
 
-// ── Ambient Particle Field ──────────────────────
 function ParticleField() {
   const particlesRef = useRef<THREE.Points>(null!);
   const count = 180;
@@ -76,15 +88,13 @@ function ParticleField() {
   );
 }
 
-// ── Main Scene3D Component ──────────────────────
 export default function Scene3D() {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [webGLSupported, setWebGLSupported] = useState(true);
+  const [isLightbox, setIsLightbox] = useState(false);
 
-  // Check WebGL support on mount
   useEffect(() => {
     try {
-      // Force fallback for headless testing environments to prevent white canvas glitches
       const isHeadless = /HeadlessChrome|Lighthouse|bot|crawler|spider/i.test(navigator.userAgent);
       if (isHeadless) {
         setWebGLSupported(false);
@@ -102,15 +112,21 @@ export default function Scene3D() {
     }
   }, []);
 
-  // Fallback for environment without WebGL support (prevents solid white canvas overrides)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsLightbox(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   if (!webGLSupported) {
     return (
       <div className="fixed inset-0 z-0 w-full h-full overflow-hidden bg-[#050208]">
-        {/* Soft background glow orbs */}
         <div className="absolute top-[25%] left-[20%] w-[450px] h-[450px] rounded-full bg-purple-600/10 blur-[130px] animate-pulse" />
         <div className="absolute bottom-[20%] right-[20%] w-[350px] h-[350px] rounded-full bg-indigo-600/10 blur-[100px] animate-pulse" />
-        
-        {/* Center floating glow representing the robotic system */}
         <div 
           className="absolute top-[35%] left-[40%] w-64 h-64 rounded-full bg-gradient-to-tr from-purple-500/15 to-indigo-500/15 blur-[50px] opacity-80"
           style={{
@@ -122,47 +138,80 @@ export default function Scene3D() {
   }
 
   return (
-    <div className="fixed inset-0 z-0 w-full h-full pointer-events-none md:pointer-events-auto">
-      <Canvas
-        camera={{ position: [0, 0, 8], fov: 45 }}
-        shadows
-        gl={{ antialias: true, alpha: true }}
-        style={{ background: "transparent" }}
-      >
-        {/* Scroll tracker */}
-        <ScrollTracker onProgress={setScrollProgress} />
+    <div 
+      className={`fixed inset-0 transition-colors duration-500 ${
+        isLightbox 
+          ? "z-[80] pointer-events-auto bg-black/85 backdrop-blur-md" 
+          : "z-0 pointer-events-none md:pointer-events-auto"
+      }`}
+    >
+      {isLightbox && (
+        <div className="absolute inset-0 z-[95] pointer-events-none flex flex-col justify-between p-6 md:p-12 font-mono">
+          <div className="flex justify-between items-center pointer-events-auto w-full">
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] tracking-[0.4em] uppercase text-purple-400 font-bold">
+                FORGE // LIGHTBOX MODE
+              </span>
+              <span className="text-[8px] tracking-[0.2em] uppercase text-purple-300/40">
+                MANUAL TELEOPERATION ACTIVE
+              </span>
+            </div>
+            <button 
+              onClick={() => setIsLightbox(false)}
+              className="px-4 py-2 border border-purple-500/30 hover:border-purple-400 bg-purple-950/20 text-purple-300 hover:text-white rounded text-[10px] tracking-[0.2em] uppercase transition-all duration-300 cursor-pointer hover:shadow-[0_0_15px_rgba(168,85,247,0.35)]"
+            >
+              CLOSE PREVIEW [ESC]
+            </button>
+          </div>
+          
+          <div className="text-center text-[9px] tracking-[0.2em] text-purple-300/50 uppercase select-none w-full">
+            [DRAG TO ROTATE] • [SCROLL TO ZOOM] • [RIGHT-CLICK DRAG TO PAN] • [DOUBLE-CLICK MODEL TO EXIT]
+          </div>
+        </div>
+      )}
 
-        {/* Cinematic Lighting Rig */}
-        <ambientLight intensity={0.25} />
-        <directionalLight
-          position={[10, 20, 15]}
-          intensity={1.2}
-          castShadow
-          shadow-mapSize-width={1024}
-          shadow-mapSize-height={1024}
-        />
-        {/* Sci-fi neon-purple rim light */}
-        <directionalLight
-          position={[-15, -10, -10]}
-          intensity={1.5}
-          color="#a855f7"
-        />
-        {/* Indigo fill from below */}
-        <directionalLight
-          position={[0, -10, 5]}
-          intensity={0.4}
-          color="#6366f1"
-        />
+      <div className="absolute inset-0 w-full h-full">
+        <Canvas
+          camera={{ position: [0, 0, 8], fov: 45 }}
+          shadows={{ type: THREE.PCFShadowMap }}
+          gl={{ antialias: true, alpha: true }}
+          style={{ background: "transparent" }}
+        >
+          {!isLightbox && <ScrollTracker onProgress={setScrollProgress} />}
 
-        {/* Particle field */}
-        <ParticleField />
+          <ambientLight intensity={isLightbox ? 0.35 : 0.25} />
+          <directionalLight
+            position={[10, 20, 15]}
+            intensity={1.2}
+            castShadow
+            shadow-mapSize-width={1024}
+            shadow-mapSize-height={1024}
+          />
+          <directionalLight
+            position={[-15, -10, -10]}
+            intensity={1.5}
+            color="#a855f7"
+          />
+          <directionalLight
+            position={[0, -10, 5]}
+            intensity={0.4}
+            color="#6366f1"
+          />
 
-        {/* 3D Model & Environment Reflections */}
-        <Suspense fallback={<LoadingFallback />}>
-          <Environment preset="city" />
-          <SlaveArm scrollProgress={scrollProgress} />
-        </Suspense>
-      </Canvas>
+          <ParticleField />
+
+          <Suspense fallback={<LoadingFallback />}>
+            <Environment preset="city" />
+            <SlaveArm 
+              scrollProgress={scrollProgress} 
+              isLightbox={isLightbox}
+              setIsLightbox={setIsLightbox}
+            />
+          </Suspense>
+
+          {isLightbox && <OrbitControls enableZoom={true} enablePan={true} makeDefault />}
+        </Canvas>
+      </div>
     </div>
   );
 }

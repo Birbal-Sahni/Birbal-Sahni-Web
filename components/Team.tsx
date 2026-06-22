@@ -76,7 +76,7 @@ export default function Team() {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Title animation
+      
       gsap.fromTo(
         titleRef.current,
         { y: 40, opacity: 0 },
@@ -93,7 +93,7 @@ export default function Team() {
         }
       );
 
-      // Staggered cards reveal
+      
       cardsRef.current.forEach((card, i) => {
         if (!card) return;
         gsap.fromTo(
@@ -125,14 +125,14 @@ export default function Team() {
       className="relative min-h-screen flex flex-col justify-center px-6 sm:px-12 md:px-20 lg:px-28 py-32 overflow-hidden"
     >
       <div className="relative z-10 max-w-6xl pl-6 sm:pl-10 md:pl-16">
-        {/* Section tag */}
+        {}
         <div className="flex items-center gap-3 mb-6">
           <span className="text-xs font-mono tracking-[0.4em] uppercase text-accent/60">
             [ PERSONNEL ROSTER ]
           </span>
         </div>
 
-        {/* Title */}
+        {}
         <h2
           ref={titleRef}
           className="text-4xl sm:text-6xl font-extralight tracking-tighter leading-none mb-20"
@@ -162,7 +162,7 @@ export default function Team() {
                     {member.initials}
                   </div>
 
-                  {/* Badge if present */}
+                  {}
                   {member.badge && (
                     <span
                       className={`badge ${
@@ -174,7 +174,7 @@ export default function Team() {
                   )}
                 </div>
 
-                {/* Details */}
+                {}
                 <h3 className="text-lg font-light text-white mb-0.5 tracking-wide">
                   {member.name}
                 </h3>
